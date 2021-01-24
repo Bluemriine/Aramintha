@@ -145,7 +145,7 @@ public class MainFrame extends JFrame {
 
 		// Signature
 		JPanel boardSignature = new JPanel();
-		final JLabel signature = new JLabel("v1.0 By Bluem#2481");
+		final JLabel signature = new JLabel("v1.1 By Bluem#2481");
 		signature.setFont(police);
 		signature.setPreferredSize(preferredSize);
 		signature.setForeground(Color.GRAY);
