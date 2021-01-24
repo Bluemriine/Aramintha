@@ -11,13 +11,13 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Service d'export des données.
@@ -25,9 +25,17 @@ import java.util.stream.Collectors;
  */
 public class ExportService {
 
+	/** The constructor !!! */
+	private ExportService() {
+		// Je joue à cache cache
+	}
+
+	/** Logger **/
+	private static final Logger logger = Logger.getLogger("MyLog");
+
 	/** Exporte les données vers le presse-papier */
 	public static void exportAtkDef() {
-		Function<String, ? extends ResultatMembreDto> construct = (param) -> {
+		Function<String, ? extends ResultatMembreDto> construct = param -> {
 			ResultatAtkDefMembreDto vRet = new ResultatAtkDefMembreDto();
 			vRet.setPseudo(param);
 			return vRet;
@@ -37,7 +45,7 @@ public class ExportService {
 
 	/** Exporte les données vers le presse-papier */
 	public static void exportContribution() {
-		Function<String, ? extends ResultatMembreDto> construct = (param) -> {
+		Function<String, ? extends ResultatMembreDto> construct = param -> {
 			ResultatContributionMembreDto vRet = new ResultatContributionMembreDto();
 			vRet.setPseudo(param);
 			return vRet;
@@ -68,18 +76,15 @@ public class ExportService {
 
 		StringBuilder sb = new StringBuilder(entete).append("\r\n");
 		listeAExtraire.forEach(item -> sb.append(item.toString()).append("\r\n"));
-		System.out.println(sb.toString());
+		logger.log(Level.INFO, sb::toString);
 		StringSelection selection = new StringSelection(sb.toString());
 		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		clipboard.setContents(selection, selection);
 
-		try {
-			String path = DataHolder.getInstance().getOutputFolder() + "\\ExportDatas-" + UUID.randomUUID().toString() + ".csv";
-			System.out.println("Fichier exporter : " + path);
-			File fichier = new File(path);
-			BufferedWriter writer = new BufferedWriter(new FileWriter(path, true));
+		final String path = DataHolder.getInstance().getOutputFolder() + "\\ExportDatas-" + UUID.randomUUID().toString() + ".csv";
+		logger.log(Level.INFO, () -> "Fichier exporté : " + path);
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(path, true))) {
 			writer.append(sb.toString());
-			writer.close();
 		} catch (IOException exception) {
 			exception.printStackTrace();
 		}
