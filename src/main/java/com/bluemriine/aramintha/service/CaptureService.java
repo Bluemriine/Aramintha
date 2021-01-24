@@ -11,9 +11,14 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import java.io.File;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** Service de capture d'image */
 public class CaptureService {
+
+	/** Logger **/
+	private static final Logger logger = Logger.getLogger("MyLog");
 
 	/** Image originale */
 	private File screenshot;
@@ -31,9 +36,10 @@ public class CaptureService {
 	 * Lance l'analyse de la zone de capture
 	 */
 	private void analyse(AbstractORCService service) {
+		logger.log(Level.INFO, () -> "Début du traitement de l'image .");
 		MainViewComponentInteractor.getInstance().setMessage("Traitement en cours ...");
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(500);
 			Optional<File> optScreenshot = ImageUtils.screenshot(msg -> MainViewComponentInteractor.getInstance().setMessage(msg));
 
 			if (optScreenshot.isPresent()) {
@@ -49,12 +55,13 @@ public class CaptureService {
 							DataHolder.getInstance().getAnalyseBouton().setEnabled(true);
 							MainViewComponentInteractor.getInstance().setMessage(msg);
 						};
+						logger.log(Level.INFO, () -> "Traitement de l'image terminé, début de l'OCR.");
 						service.doOCR(screenshotResize, consumerOk, msg -> MainViewComponentInteractor.getInstance().setMessage(msg));
 					}
 				}
 			}
 		} catch (Exception ex) {
-			System.out.println(ExceptionUtils.getStackTrace(ex));
+			logger.log(Level.SEVERE, () -> "Erreur lors de la capture de l'image" + ExceptionUtils.getStackTrace(ex));
 			MainViewComponentInteractor.getInstance().setMessage("Erreur lors de la capture de l'image.");
 		}
 

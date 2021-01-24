@@ -7,6 +7,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * JFrame pour la capture d'écran.
@@ -15,6 +17,9 @@ import java.awt.event.MouseEvent;
 public class CaptureFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
+	
+	/** Logger **/
+	private static final Logger logger = Logger.getLogger("MyLog");
 
 	/** Coordonnée X du 1er point de la zone de capture (haut à gauche) */
 	private int squareX1 = 0;
@@ -117,12 +122,14 @@ public class CaptureFrame extends JFrame {
 							squareY2 = squareY1;
 							squareY1 = tmp;
 						}
+						logger.log(Level.INFO, () ->"Zone de capture définie.");
 						MainViewComponentInteractor.getInstance().setMessage("Zone de capture définie.");
 						popupValidation.setVisible(true);
 					}
 				}
 				else if (SwingUtilities.isRightMouseButton(e)) {
 					squareX1 = squareY1 = squareX2 = squareY2 = 0;
+					logger.log(Level.INFO, () ->"Zone de capture précédente restaurée.");
 					MainViewComponentInteractor.getInstance().setMessage("Zone de capture précédente restaurée.");
 				}
 				repaint();

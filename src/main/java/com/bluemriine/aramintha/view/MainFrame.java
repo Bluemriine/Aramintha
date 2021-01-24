@@ -12,6 +12,8 @@ import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Ecran principal de l'application.
@@ -20,6 +22,11 @@ import java.io.File;
 public class MainFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
+
+	/** Logger **/
+	private static final Logger logger = Logger.getLogger("MyLog");
+	/** Le service de capture */
+	private final transient CaptureService captureService;
 
 	/** Bouton pour lancer la sélection de la zone de capture. */
 	private JButton defineCaptureZoneBouton;
@@ -31,15 +38,13 @@ public class MainFrame extends JFrame {
 	private JButton exportBouton;
 	/** Bouton pour charger la liste des noms de membres. */
 	private JButton importBouton;
-	/** Le service de capture */
-	CaptureService captureService = new CaptureService();
 	/** Le radio bouton ATK/ DEF */
 	private JRadioButton atkDefRadioBouton;
-
 
 	/** The Constructor !!! */
 	public MainFrame() {
 		super("Aramintha Guild Wars Data Extractor");
+		captureService = new CaptureService();
 		initLayout();
 		initAction();
 		feedViewInteractor();
@@ -55,7 +60,7 @@ public class MainFrame extends JFrame {
 		// Création du LayeredPanel.
 		Dimension boardSize = new Dimension(390, 240);
 		this.setSize(boardSize.width, boardSize.height);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		this.setLocation(50, 40);
 		this.setResizable(false);
 		this.setVisible(true);
@@ -188,7 +193,8 @@ public class MainFrame extends JFrame {
 
 			if (returnValue == JFileChooser.APPROVE_OPTION) {
 				File selectedFile = jfc.getSelectedFile();
-				new ImportListePseudoService(selectedFile.getAbsolutePath());
+				logger.log(Level.INFO, () ->"Fichier des pseudos sélectionné : " + selectedFile.getAbsolutePath());
+				ImportListePseudoService.importListe(selectedFile.getAbsolutePath());
 			}
 		});
 

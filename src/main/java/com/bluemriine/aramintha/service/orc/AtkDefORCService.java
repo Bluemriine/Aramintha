@@ -8,11 +8,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -20,6 +19,11 @@ import java.util.stream.Collectors;
  * @author BlueM
  */
 public class AtkDefORCService extends AbstractORCService {
+
+	/** Logger **/
+	private static final Logger logger = Logger.getLogger("MyLog");
+	private static final String INPUT = "Input : ";
+	private static final String OUTPUT = " Output : ";
 
 	/**
 	 * The constructor !!!
@@ -30,7 +34,9 @@ public class AtkDefORCService extends AbstractORCService {
 
 	/**
 	 * Lance l'analyse
-	 * @param file - Le fichier à analyser.
+	 * @param file       - Le fichier à analyser.
+	 * @param consumerOk - Action en cas de succès
+	 * @param consumerKo - Action en cas d'erreur
 	 */
 	@Override
 	public void doOCR(File file, Consumer<String> consumerOk, Consumer<String> consumerKo) {
@@ -50,38 +56,53 @@ public class AtkDefORCService extends AbstractORCService {
 				List<String> cleanLines = new LinkedList<>();
 				cleanLines.addAll(names);
 				cleanLines.addAll(cleanLinesStep2);
-				cleanLines.forEach(System.out::println);
-				switch (cleanLines.size()) {
-					case 14: {
-						ResultatAtkDefMembreDto mb1 = createMember(cleanLines, Arrays.asList(0, 2, 3, 4, 8, 9, 10));
-						ResultatAtkDefMembreDto mb2 = createMember(cleanLines, Arrays.asList(1, 5, 6, 7, 11, 12, 13));
-						if (mb1.getPseudo().equalsIgnoreCase(mb2.getPseudo())) {
-							DataHolder.getInstance().getListResultatAtkDefMembre().add(mb1);
-						}
-						else {
-							DataHolder.getInstance().getListResultatAtkDefMembre().addAll(Arrays.asList(mb1, mb2));
-						}
-						consumerOk.accept("Prêt pour la prochaine extraction.");
-						break;
-					}
-					case 21: {
-						ResultatAtkDefMembreDto mb1 = createMember(cleanLines, Arrays.asList(0, 3, 4, 5, 12, 13, 14));
-						ResultatAtkDefMembreDto mb2 = createMember(cleanLines, Arrays.asList(1, 6, 7, 8, 15, 16, 17));
-						ResultatAtkDefMembreDto mb3 = createMember(cleanLines, Arrays.asList(2, 9, 10, 11, 18, 19, 20));
-						DataHolder.getInstance().getListResultatAtkDefMembre().addAll(Arrays.asList(mb1, mb2, mb3));
-						consumerOk.accept("Prêt pour la prochaine extraction.");
-						break;
-					}
-					default:
-						System.out.println("Erreur dans la lecture des lines :");
-						cleanLines.forEach(System.out::println);
-						consumerKo.accept("Erreur lors de l'analyse de l'image.");
-						break;
-				}
+
+				StringJoiner sj = new StringJoiner("\r\n");
+				cleanLines.forEach(sj::add);
+				logger.log(Level.INFO, () -> "Lignes trouvées dans l'image : \r\n" + sj.toString());
+
+				readLines(consumerOk, consumerKo, cleanLines);
 			}
 		} catch (TesseractException ex) {
-			System.out.println(ExceptionUtils.getStackTrace(ex));
+			logger.log(Level.SEVERE, () -> "Erreur lors de l'analyse de l'image :" + ExceptionUtils.getStackTrace(ex));
 			consumerKo.accept("Erreur lors de l'analyse de l'image.");
+		}
+	}
+
+	/**
+	 * Analyse les lignes extraites
+	 * @param consumerOk - Action en cas de succès
+	 * @param consumerKo - Action en cas d'erreur
+	 * @param cleanLines - Les lignes à analyser
+	 */
+	private void readLines(Consumer<String> consumerOk, Consumer<String> consumerKo, List<String> cleanLines) {
+		switch (cleanLines.size()) {
+			case 14: {
+				ResultatAtkDefMembreDto mb1 = createMember(cleanLines, Arrays.asList(0, 2, 3, 4, 8, 9, 10));
+				ResultatAtkDefMembreDto mb2 = createMember(cleanLines, Arrays.asList(1, 5, 6, 7, 11, 12, 13));
+				if (mb1.getPseudo().equalsIgnoreCase(mb2.getPseudo())) {
+					DataHolder.getInstance().getListResultatAtkDefMembre().add(mb1);
+				}
+				else {
+					DataHolder.getInstance().getListResultatAtkDefMembre().addAll(Arrays.asList(mb1, mb2));
+				}
+				consumerOk.accept("Prêt pour la prochaine extraction.");
+				break;
+			}
+			case 21: {
+				ResultatAtkDefMembreDto mb1 = createMember(cleanLines, Arrays.asList(0, 3, 4, 5, 12, 13, 14));
+				ResultatAtkDefMembreDto mb2 = createMember(cleanLines, Arrays.asList(1, 6, 7, 8, 15, 16, 17));
+				ResultatAtkDefMembreDto mb3 = createMember(cleanLines, Arrays.asList(2, 9, 10, 11, 18, 19, 20));
+				DataHolder.getInstance().getListResultatAtkDefMembre().addAll(Arrays.asList(mb1, mb2, mb3));
+				consumerOk.accept("Prêt pour la prochaine extraction.");
+				break;
+			}
+			default:
+				StringJoiner sj = new StringJoiner("\r\n");
+				cleanLines.forEach(sj::add);
+				logger.log(Level.SEVERE, () -> "Erreur dans la lecture des lines : " + sj.toString());
+				consumerKo.accept("Erreur lors de l'analyse de l'image.");
+				break;
 		}
 	}
 
@@ -107,11 +128,13 @@ public class AtkDefORCService extends AbstractORCService {
 	/**
 	 * Extraction du nom
 	 * @param uncleanPseudo - Le pseudo à nettoyer.
-	 * @return
+	 * @return Le pseudo
 	 */
 	private static String cleanName(String uncleanPseudo) {
 		String trimPseudo = StringUtils.trim(uncleanPseudo);
-		return Arrays.asList(trimPseudo.split(" ")).stream().max(Comparator.comparing(String::length)).orElse(trimPseudo);
+		String output = Arrays.stream(trimPseudo.split(" ")).max(Comparator.comparing(String::length)).orElse(trimPseudo);
+		logger.log(Level.INFO, () -> INPUT + uncleanPseudo + OUTPUT + output);
+		return output;
 	}
 
 	/**
@@ -134,7 +157,7 @@ public class AtkDefORCService extends AbstractORCService {
 			String extract = input.substring(0, debutMotCle);
 			extract = StringUtils.trim(extract);
 
-			String possibleNumber = "";
+			final StringBuilder possibleNumber = new StringBuilder();
 			boolean digitTrouve = false;
 
 			for (int it = extract.length() - 1; it >= 0; it--) {
@@ -142,32 +165,31 @@ public class AtkDefORCService extends AbstractORCService {
 					break;
 				}
 				if ('O' == extract.charAt(it)) {
-					possibleNumber = "0" + possibleNumber;
+					possibleNumber.insert(0, "0");
 					digitTrouve = true;
 				}
 				else if (digitTrouve && !Character.isDigit(extract.charAt(it))) {
 					break;
 				}
 				else if (Character.isDigit(extract.charAt(it))) {
-					possibleNumber = "" + extract.charAt(it) + possibleNumber;
+					possibleNumber.insert(0, "" + extract.charAt(it));
 					digitTrouve = true;
 				}
 			}
 
 			if (StringUtils.isNotBlank(possibleNumber)) {
-				System.out.println("Input : " + input + " trouvé : " + possibleNumber);
-				return Integer.valueOf(possibleNumber);
+				logger.log(Level.INFO, () -> INPUT + input + OUTPUT + possibleNumber.toString());
+				return Integer.valueOf(possibleNumber.toString());
 			}
 			else {
-				System.out.println("Impossible de trouver une data, tentative avec un second algorithme (moins fiable).");
+				logger.log(Level.WARNING, () -> "Determination impossible de la valeur avec un premier algorithme, tentative avec un second.");
 			}
 		}
 
-		String temp;
-		temp = input.replaceAll("[^0-9]", "");
-		temp = StringUtils.isBlank(temp) ? "0" : temp;
+		String temp = input.replaceAll("[^0-9]", "");
+		final Integer result = StringUtils.isBlank(temp) ? 0 : Integer.parseInt(temp);
+		logger.log(Level.INFO, () -> INPUT + input + OUTPUT + result);
 
-		System.out.println("Input : " + input + " trouvé : " + temp);
-		return Integer.valueOf(temp);
+		return result;
 	}
 }
