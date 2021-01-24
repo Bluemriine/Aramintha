@@ -7,15 +7,25 @@ import org.imgscalr.Scalr;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.RescaleOp;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** Classe utilitaire pour la manipulation d'images */
 public final class ImageUtils {
+
+	/** Logger **/
+	private static final Logger logger = Logger.getLogger("MyLog");
+
+	/** The constructor !!! */
+	private ImageUtils() {
+		// Je joue à cache cache
+	}
 
 	/**
 	 * Inverse les couleurs d'une image.
@@ -51,7 +61,7 @@ public final class ImageUtils {
 
 		} catch (IOException ex) {
 			consumerKo.accept("Erreur de manipulation du négatif.");
-			System.out.println(ExceptionUtils.getStackTrace(ex));
+			logger.log(Level.SEVERE, () -> "Erreur de manipulation du négatif : " + ExceptionUtils.getStackTrace(ex));
 		}
 		return outputFile;
 	}
@@ -72,7 +82,7 @@ public final class ImageUtils {
 			ImageIO.write(Scalr.resize(img, 1940), "png", resized);
 		} catch (Exception ex) {
 			consumerKo.accept("Erreur du redimensionnement de l'image.");
-			System.out.println(ExceptionUtils.getStackTrace(ex));
+			logger.log(Level.SEVERE, () -> "Erreur du redimensionnement de l'image." + ExceptionUtils.getStackTrace(ex));
 		}
 		return outputFile;
 	}
@@ -83,11 +93,11 @@ public final class ImageUtils {
 	 */
 	public static void deleteFiles(File image) {
 		if (image != null) {
-			if (image.delete()) {
-				System.out.println("Suppression du fichier Ok.");
-			}
-			else {
-				System.out.println("Suppression du fichier Ko.");
+			try {
+				Files.delete(image.toPath());
+				logger.log(Level.INFO, () -> "Fichier supprimé ok. ");
+			} catch (IOException ex) {
+				logger.log(Level.SEVERE, () -> "Suppression du fichier Ko : " + ExceptionUtils.getStackTrace(ex));
 			}
 		}
 	}
@@ -107,7 +117,7 @@ public final class ImageUtils {
 			outputFile = Optional.of(new File(pathname));
 		} catch (Exception ex) {
 			consumerKo.accept("Erreur de la capture de l'image.");
-			System.out.println(ExceptionUtils.getStackTrace(ex));
+			logger.log(Level.SEVERE, () -> "Erreur de la capture de l'image : " + ExceptionUtils.getStackTrace(ex));
 		}
 		return outputFile;
 	}
@@ -130,7 +140,7 @@ public final class ImageUtils {
 				ImageIO.write(buf, "png", file);
 			}
 		} catch (Exception ex) {
-			System.out.println(ExceptionUtils.getStackTrace(ex));
+			logger.log(Level.SEVERE, () -> "Erreur de la manipulation de l'image : " + ExceptionUtils.getStackTrace(ex));
 		}
 	}
 }
