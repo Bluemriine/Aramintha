@@ -1,10 +1,15 @@
 package com.bluemriine.aramintha.data;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import javax.swing.*;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Singleton qui permet de conserver les données lues par ORC.
@@ -17,9 +22,9 @@ public class DataHolder {
 	/** OutputFolder */
 	private String outputFolder;
 	/** Liste des résultats de contribution */
-	private Set<ResultatContributionMembreDto> listResultatContributionMembre = new HashSet<>();
+	private Set<ResultatContributionMembreDto> listResultatContributionMembre = new LinkedHashSet<>();
 	/** Liste des résultats ATK / DEF */
-	private Set<ResultatAtkDefMembreDto> listResultatAtkDefMembre = new HashSet<>();
+	private Set<ResultatAtkDefMembreDto> listResultatAtkDefMembre = new LinkedHashSet<>();
 	/** Liste de pseudo ordonnés pour l'export des données */
 	private List<String> listePseudo = new LinkedList<>();
 	/** Chemin vers le données extraites de Tesseract */

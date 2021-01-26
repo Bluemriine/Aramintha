@@ -33,44 +33,52 @@ public class CaptureService {
 	}
 
 	/**
-	 * Lance l'analyse de la zone de capture
+	 * Capture l'image et lance l'analyse de la zone de capture
+	 * @param service - Service d'extraction des données
 	 */
-	private void analyse(AbstractORCService service) {
+	private void captureEtAnalyse(AbstractORCService service) {
 		logger.log(Level.INFO, () -> "Début du traitement de l'image .");
 		MainViewComponentInteractor.getInstance().setMessage("Traitement en cours ...");
 		try {
 			Thread.sleep(500);
 			Optional<File> optScreenshot = ImageUtils.screenshot(msg -> MainViewComponentInteractor.getInstance().setMessage(msg));
-
-			if (optScreenshot.isPresent()) {
-				screenshot = optScreenshot.get();
-				Optional<File> optInvertedScreenshot = ImageUtils.invertImage(screenshot, msg -> MainViewComponentInteractor.getInstance().setMessage(msg));
-				if (optInvertedScreenshot.isPresent()) {
-					screenshotInvert = optInvertedScreenshot.get();
-
-					Optional<File> optResizedScreenshot = ImageUtils.simpleResizeImage(screenshotInvert, msg -> MainViewComponentInteractor.getInstance().setMessage(msg));
-					if (optResizedScreenshot.isPresent()) {
-						screenshotResize = optResizedScreenshot.get();
-						Consumer<String> consumerOk = msg -> {
-							DataHolder.getInstance().getAnalyseBouton().setEnabled(true);
-							MainViewComponentInteractor.getInstance().setMessage(msg);
-						};
-						logger.log(Level.INFO, () -> "Traitement de l'image terminé, début de l'OCR.");
-						service.doOCR(screenshotResize, consumerOk, msg -> MainViewComponentInteractor.getInstance().setMessage(msg));
-					}
-				}
-			}
+			analyse(service, optScreenshot);
 		} catch (Exception ex) {
 			logger.log(Level.SEVERE, () -> "Erreur lors de la capture de l'image" + ExceptionUtils.getStackTrace(ex));
 			MainViewComponentInteractor.getInstance().setMessage("Erreur lors de la capture de l'image.");
 		}
+	}
 
-		ImageUtils.deleteFiles(screenshot);
-		screenshot = null;
-		ImageUtils.deleteFiles(screenshotInvert);
-		screenshotInvert = null;
-		ImageUtils.deleteFiles(screenshotResize);
-		screenshotResize = null;
+	/**
+	 * Lance l'analyse de la zone de capture
+	 * @param service       - Service d'extraction des données
+	 * @param optScreenshot - L'optional contenant possiblement un screenshot
+	 */
+	public void analyse(AbstractORCService service, Optional<File> optScreenshot) {
+		if (optScreenshot.isPresent()) {
+			screenshot = optScreenshot.get();
+			Optional<File> optInvertedScreenshot = ImageUtils.invertImage(screenshot, msg -> MainViewComponentInteractor.getInstance().setMessage(msg));
+			if (optInvertedScreenshot.isPresent()) {
+				screenshotInvert = optInvertedScreenshot.get();
+
+				Optional<File> optResizedScreenshot = ImageUtils.simpleResizeImage(screenshotInvert, msg -> MainViewComponentInteractor.getInstance().setMessage(msg));
+				if (optResizedScreenshot.isPresent()) {
+					screenshotResize = optResizedScreenshot.get();
+					Consumer<String> consumerOk = msg -> {
+						DataHolder.getInstance().getAnalyseBouton().setEnabled(true);
+						MainViewComponentInteractor.getInstance().setMessage(msg);
+					};
+					logger.log(Level.INFO, () -> "Traitement de l'image terminé, début de l'OCR.");
+					service.doOCR(screenshotResize, consumerOk, msg -> MainViewComponentInteractor.getInstance().setMessage(msg));
+				}
+			}
+			ImageUtils.deleteFiles(screenshot);
+			screenshot = null;
+			ImageUtils.deleteFiles(screenshotInvert);
+			screenshotInvert = null;
+			ImageUtils.deleteFiles(screenshotResize);
+			screenshotResize = null;
+		}
 	}
 
 
@@ -78,13 +86,13 @@ public class CaptureService {
 	 * Lance l'analyse de la zone de capture
 	 */
 	public void analyseZoneCaptureAtkDef() {
-		analyse(new AtkDefORCService());
+		captureEtAnalyse(new AtkDefORCService());
 	}
 
 	/**
 	 * Lance l'analyse de la zone de capture
 	 */
 	public void analyseZoneCaptureContribution() {
-		analyse(new ContributionORCService());
+		captureEtAnalyse(new ContributionORCService());
 	}
 }

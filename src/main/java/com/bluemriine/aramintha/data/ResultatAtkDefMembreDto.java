@@ -25,6 +25,17 @@ public class ResultatAtkDefMembreDto extends ResultatMembreDto implements Serial
 	private Integer atkDraw;
 	private Integer atkLoose;
 
+	@Builder
+	public ResultatAtkDefMembreDto(String pseudo, Integer defWin, Integer defDraw, Integer defLoose, Integer atkWin, Integer atkDraw, Integer atkLoose) {
+		super(pseudo);
+		this.defWin = defWin;
+		this.defDraw = defDraw;
+		this.defLoose = defLoose;
+		this.atkWin = atkWin;
+		this.atkDraw = atkDraw;
+		this.atkLoose = atkLoose;
+	}
+
 	@Override
 	public String toString() {
 		return "" + pseudo + "," + atkWin + "," + atkDraw + "," + atkLoose + "," + defWin + "," + defDraw + "," + defLoose;
