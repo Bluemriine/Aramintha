@@ -150,7 +150,7 @@ public class MainFrame extends JFrame {
 
 		// Signature
 		JPanel boardSignature = new JPanel();
-		final JLabel signature = new JLabel("v1.1 By Bluem#2481");
+		final JLabel signature = new JLabel("v1.2 By Bluem#2481");
 		signature.setFont(police);
 		signature.setPreferredSize(preferredSize);
 		signature.setForeground(Color.GRAY);
@@ -193,7 +193,7 @@ public class MainFrame extends JFrame {
 
 			if (returnValue == JFileChooser.APPROVE_OPTION) {
 				File selectedFile = jfc.getSelectedFile();
-				logger.log(Level.INFO, () ->"Fichier des pseudos sélectionné : " + selectedFile.getAbsolutePath());
+				logger.log(Level.INFO, () -> "Fichier des pseudos sélectionné : " + selectedFile.getAbsolutePath());
 				ImportListePseudoService.importListe(selectedFile.getAbsolutePath());
 			}
 		});
