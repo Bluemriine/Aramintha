@@ -19,6 +19,12 @@ public class ResultatContributionMembreDto extends ResultatMembreDto implements 
 	private static final long serialVersionUID = 1L;
 	private Integer points;
 
+	@Builder
+	public ResultatContributionMembreDto(String pseudo, Integer points) {
+		super(pseudo);
+		this.points = points;
+	}
+
 	@Override
 	public String toString() {
 		return "" + pseudo + "," + points;

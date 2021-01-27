@@ -38,8 +38,7 @@ public class ContributionORCService extends AbstractORCService {
 	@Override
 	public void doOCR(File file, Consumer<String> consumerOk, Consumer<String> consumerKo) {
 		try {
-			String result = tesseract.doOCR(file);
-			List<String> lines = Arrays.asList(result.split("\\r?\\n"));
+			List<String> lines = getLines(file);
 			List<String> cleanLines = lines.stream().filter(line -> StringUtils.isNotBlank(line) && !StringUtils.startsWith(line, "Rank")).collect(Collectors.toList());
 
 			StringJoiner sj = new StringJoiner("\r\n");

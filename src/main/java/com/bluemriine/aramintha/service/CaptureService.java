@@ -47,6 +47,8 @@ public class CaptureService {
 			logger.log(Level.SEVERE, () -> "Erreur lors de la capture de l'image" + ExceptionUtils.getStackTrace(ex));
 			MainViewComponentInteractor.getInstance().setMessage("Erreur lors de la capture de l'image.");
 		}
+		ImageUtils.deleteFiles(screenshot);
+		screenshot = null;
 	}
 
 	/**
@@ -72,8 +74,6 @@ public class CaptureService {
 					service.doOCR(screenshotResize, consumerOk, msg -> MainViewComponentInteractor.getInstance().setMessage(msg));
 				}
 			}
-			ImageUtils.deleteFiles(screenshot);
-			screenshot = null;
 			ImageUtils.deleteFiles(screenshotInvert);
 			screenshotInvert = null;
 			ImageUtils.deleteFiles(screenshotResize);

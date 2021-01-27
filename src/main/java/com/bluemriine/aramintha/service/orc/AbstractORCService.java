@@ -11,12 +11,17 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Service ORC
  * @author BlueM
  */
 public abstract class AbstractORCService {
+
+	/** Logger **/
+	private static final Logger logger = Logger.getLogger("MyLog");
 
 	/** Tesseract ORC */
 	protected Tesseract tesseract;
@@ -32,12 +37,13 @@ public abstract class AbstractORCService {
 		tesseract.setLanguage("fra");
 		tesseract.setPageSegMode(1);
 		tesseract.setOcrEngineMode(1);
-		tesseract.setTessVariable("user_defined_dpi", "300");
+		tesseract.setTessVariable("user_defined_dpi", "70");
 	}
 
 	/** Extrait le texte d'une image */
 	protected List<String> getLines(File file) throws TesseractException {
 		String result = tesseract.doOCR(file);
+		logger.log(Level.INFO, () -> "Untouch text : \r\n" + result);
 		List<String> lines = new LinkedList<>();
 		Collections.addAll(lines, result.split("\\r?\\n"));
 		return lines;

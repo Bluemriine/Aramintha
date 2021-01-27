@@ -1,6 +1,6 @@
 Feature: Extraction ATK/DEF
 
-  En tant qu'utilisateur je veux verifier la fiabilité de l'extraction des données ATK / Def
+  En tant qu'utilisateur je veux verifier la fiabilité de l'extraction des données
 
   Scenario: Vérification A
     Given Image de départ 'testA.png'
@@ -16,3 +16,8 @@ Feature: Extraction ATK/DEF
     Given Image de départ 'testC.png'
     When  Je passe le fichier à la reconnaissance de texte
     Then  J ai les bons scores pour l image 'testC.png'
+
+  Scenario: Vérification D
+    Given Image de départ 'testD.png'
+    When  Je passe le fichier à la reconnaissance de texte de contribution
+    Then  J ai les bons scores de contribution pour l image
