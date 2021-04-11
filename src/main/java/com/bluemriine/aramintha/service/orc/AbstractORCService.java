@@ -27,7 +27,7 @@ public abstract class AbstractORCService {
 	protected Tesseract tesseract;
 
 	/** Configure Tesseract */
-	protected void configureTesseract() {
+	protected void configureTesseract(Integer pageSegmentation) {
 		tesseract = new Tesseract();
 		if (StringUtils.isBlank(DataHolder.getInstance().getPathTesseract())) {
 			File tessDataFolder = LoadLibs.extractTessResources("tessdata");
@@ -35,7 +35,7 @@ public abstract class AbstractORCService {
 		}
 		tesseract.setDatapath(DataHolder.getInstance().getPathTesseract());
 		tesseract.setLanguage("fra");
-		tesseract.setPageSegMode(1);
+		tesseract.setPageSegMode(pageSegmentation);
 		tesseract.setOcrEngineMode(1);
 		tesseract.setTessVariable("user_defined_dpi", "70");
 	}

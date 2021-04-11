@@ -29,7 +29,7 @@ public class AtkDefORCService extends AbstractORCService {
 	 * The constructor !!!
 	 */
 	public AtkDefORCService() {
-		configureTesseract();
+		configureTesseract(1);
 	}
 
 	/**
